@@ -78,7 +78,7 @@ More detail about dataset, the zip file can be downloaded at the google drive li
 # Approaching:
 Idea: we want to detect text from a text image:
 ![idea](https://drive.google.com/uc?export=view&id=1rO7XMFKJyg-81cw_wWoVguwH8w44jGzx)
-However, character segmentation is not practical because:
+- However, character segmentation is not practical because:
 ![charactersegmentation](https://drive.google.com/uc?export=view&id=1-k6bKUUQfTvb8SV6rcCfaims_dl4OPBh)
 - Too time comsuming
 - Too expensive
@@ -91,7 +91,7 @@ In this model, the image will be dissected by a fixed number of timesteps in the
 ![dissect](https://drive.google.com/uc?export=view&id=1CEoqdg8s_rUX_Z_OHccuavESKkpp0ARs)
 # The Proposed Architecture Architecture:
 The neural network architecture CRNN consists of 3 components, including convolutional layers, recurrent layers, and a transcription layer, from bottom to top.
-![architecture](https://drive.google.com/uc?export=view&id=1eKZ8A4TtEQlewstK2qKO8l-ZN4PkdvkW)
+- ![architecture](https://drive.google.com/uc?export=view&id=1eKZ8A4TtEQlewstK2qKO8l-ZN4PkdvkW)
 
 At the bottom layer of CRNN, the convolutional layers automatically extract a feature sequence from each input image. Above the convolutional layers is a recurrent network built to make predictions for each frame of the feature sequence (the output of convolutional layers).
 
