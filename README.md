@@ -333,7 +333,36 @@ More information regarding the implementation can be found in the jupyter notebo
 The number of callbacks I used are very helpful which are ModelCheckpoint, EarlyStopping and ReduceLROnPlateau which allows my model to keep on improving after 2 hours of training.
 
 # Evaluation Metrics:
-# Results
+Evaluation is based on character error rate (CER)
+
+- CER is calculated based on Edit distance (or Levenshtein distance)
+Given a predicted string A, and the ground truth string B, CER is specified by:
+
+![CER](https://drive.google.com/uc?export=view&id=1O1bhhZQplshvNRV2BkeWPd_XTU1xNrwn)
+
+- Word Error Rate:
+
+![WER](https://drive.google.com/uc?export=view&id=1-w5-zS_OXG3R5MnX_1pZeSUB7J4PNBp_)
+
+- Sequece Error Rate:
+
+![SER](https://drive.google.com/uc?export=view&id=1UQfNG2FqT-RxaqPXlcaCDPhuoWh22u2j)
+
+# Results:
+Here are the important three evaluation metris for a test set (the host's private test):
+
+  + CER (Character Error Rate): 0.08803356531644808
+
+  + WER (Word Error Rate): 0.2735233391975599
+
+  + SER (Sequence Error Rate): 0.9253187613843351
+
+We got a pretty good results with CER at 8% and WER at 27%!
+
+There are plenty of examples where the model predicts every single character perfectly like this!
+
+![test](https://drive.google.com/uc?export=view&id=1I0aKAAbBgE8MokfvFfDZ8cpPrgioZ902)
+
 # References:
 [1] https://github.com/TomHuynhSG/Vietnamese-Handwriting-Recognition-OCR
 
