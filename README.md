@@ -89,7 +89,7 @@ This model is much more superior than traditional way which does not involve any
 
 In this model, the image will be dissected by a fixed number of timesteps in the RNN layers so as long as each character is seperated by two or three parts to be processed and decoded later then the spacing between each character is irrelevant like so:
 ![dissect](https://drive.google.com/uc?export=view&id=1CEoqdg8s_rUX_Z_OHccuavESKkpp0ARs)
-# The Proposed Architecture Architecture:
+# The Proposed Neural Architecture:
 The neural network architecture CRNN consists of 3 components, including convolutional layers, recurrent layers, and a transcription layer, from bottom to top.
 - ![architecture](https://drive.google.com/uc?export=view&id=1eKZ8A4TtEQlewstK2qKO8l-ZN4PkdvkW)
 
@@ -104,4 +104,246 @@ The Transcription layer at the topmost level of CRNN is used to translate each p
 - Each vector in the sequence of feature vectors is extracted from feature maps corresponding to a receptive field. These feature vectors can be considered as representations of the image for that specific region. Consequently, the model can utilize these features to identify objects and information within the image.
 - ![receptivefield](https://drive.google.com/uc?export=view&id=18sqOno0xb8iIwBMBIccEmTr3Nfe42rJs)
 ## Sequence labeling with RNN layer:
+For sentence and text understanding, considering the context from both left to right and right to left can provide valuable information. To utilize information from both directions, we combine two LSTM networks: one processes the input sequence in the forward direction, and the other processes it in the backward direction, forming a bidirectional LSTM network. In this project, we stack multiple layers of bidirectional LSTM, creating a deep bidirectional LSTM network to leverage information from both directions effectively.
+- ![DeepBidirectionalLSTM](https://drive.google.com/uc?export=view&id=1y7hWGZKDcHgEQyOQeOtt_3cxizd-eVM1)
 ## Transcription layer:
+- The objective is to convert the per-frame predictions of the RNN into a predicted label sequence.
+- let's assume:
+
++ The input X (which is the output of the RNN) has a length of 10 time steps.
++ The label of X is "chào" (meaning "hello" in English).
++ The output Y has a length of 4, Y = [c, h, à, o].
+Instead of directly predicting "chào" as a whole, the RNN will predict its variations, such as "cchhhààooo, cccchàààoo, ..." and so on.
+
+From these alignments, by removing duplicate characters, we can obtain the desired result "chào" as the final predicted label sequence.
+- ![ideaRNNprocession](https://drive.google.com/uc?export=view&id=1KXE_flXITS8-5D0dkNJpfkphVxm7pTxR)
+- The mentioned approach has two issues:
+  + It forces the RNN's output to correspond to exactly one character, which doesn't account for frames without any characters (e.g., background frames).
+  + The output can be incorrect, for example, "heeeeellloo" being predicted as "helo" instead of "hello."
+To address these issues, the Connectionist Temporal Classification (CTC) method is used. CTC loss introduces a special blank token, represented as "-", to create alignments. When encoding text, we add multiple arbitrary blank characters between any two characters and also between consecutive similar characters. For example, "hello" will have alignments like "heeeel–llo", "-hell-l–oo", and so on, always with at least one "-" between two "l" characters.
+
+CTC is suitable for two tasks:
+
++ Training: It computes the loss to train the network.
++ Prediction (inference): It decodes this matrix to obtain the output text. This is done by calculating 
+<blockquote style="text-align: center;">
+  Y* = argmax p(Y|X)
+</blockquote>
+, where Y* is the predicted label sequence given the input X.
+
+### Probability of label sequence:
+- The given notation:
+  + Input X: The per-frame predictions X = x1, x2, ..., xT (where T is the length of the sequence).
+  + Output Y: The label sequence.
+  + A: A single alignment.
+  + A(X,Y): The set of all alignments A for the output sequence Y.
+  + at: a single character at each time step of Alignment A.
+- ![Probability](https://drive.google.com/uc?export=view&id=1ZXgFGIBx1NJpnkXdaHkhC3Wdyd3erxoq)
+- ![VisualizeProbability](https://drive.google.com/uc?export=view&id=1z5nhqa8RZ1bC4eJDOpCz-sRwWyDRO_RB)
+
+Once we have the Loss function, we proceed to compute the gradients as usual. Parameters will be adjusted to minimize the negative log likelihood function.
+
+In the training process. During training, we provide a sample data (an image) and its corresponding Ground Truth text (actual label sequence). The CTC Loss function estimates the loss by computing the probability of the Ground Truth Text based on the output of the BLSTM network. It attempts to find the most probable path corresponding to the Ground Truth Text.
+
+To measure the distance between the actual label sequence and the predicted label sequence from the model, the objective of the training process is to minimize the loss. In other words, the goal is to make the predicted label sequence from the model as close as possible to the actual label sequence.
+
+The Decoding process is quite simple and involves two steps:
++ Finding the alignment that passes through the characters with the highest probabilities in each time step.
+Removing consecutive identical characters and then removing blank characters.
++ In summary, during training, the CTC Loss function helps find the best alignment between the predicted and actual label sequences, and during decoding, the process involves removing duplicates and blank characters from the predicted label sequence.
+
+<p>
+  To gain a better understanding of CTC, readers can refer to
+  <a href="https://distill.pub/2017/ctc/">here.</a>
+</p> 
+
+# The Network Architecture to solve the problem:
+<div class="snippet-clipboard-content notranslate position-relative overflow-auto"><pre class="notranslate"><code>__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to                     
+==================================================================================================
+input_1 (InputLayer)            [(None, 118, 2167, 1 0                                            
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 118, 2167, 64 640         input_1[0][0]                    
+__________________________________________________________________________________________________
+max_pooling2d (MaxPooling2D)    (None, 39, 722, 64)  0           conv2d[0][0]                     
+__________________________________________________________________________________________________
+activation (Activation)         (None, 39, 722, 64)  0           max_pooling2d[0][0]              
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 39, 722, 128) 73856       activation[0][0]                 
+__________________________________________________________________________________________________
+max_pooling2d_1 (MaxPooling2D)  (None, 13, 240, 128) 0           conv2d_1[0][0]                   
+__________________________________________________________________________________________________
+activation_1 (Activation)       (None, 13, 240, 128) 0           max_pooling2d_1[0][0]            
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 13, 240, 256) 295168      activation_1[0][0]               
+__________________________________________________________________________________________________
+batch_normalization (BatchNorma (None, 13, 240, 256) 1024        conv2d_2[0][0]                   
+__________________________________________________________________________________________________
+activation_2 (Activation)       (None, 13, 240, 256) 0           batch_normalization[0][0]        
+__________________________________________________________________________________________________
+conv2d_3 (Conv2D)               (None, 13, 240, 256) 590080      activation_2[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_1 (BatchNor (None, 13, 240, 256) 1024        conv2d_3[0][0]                   
+__________________________________________________________________________________________________
+add (Add)                       (None, 13, 240, 256) 0           batch_normalization_1[0][0]      
+                                                                 activation_2[0][0]               
+__________________________________________________________________________________________________
+activation_3 (Activation)       (None, 13, 240, 256) 0           add[0][0]                        
+__________________________________________________________________________________________________
+conv2d_4 (Conv2D)               (None, 13, 240, 512) 1180160     activation_3[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_2 (BatchNor (None, 13, 240, 512) 2048        conv2d_4[0][0]                   
+__________________________________________________________________________________________________
+activation_4 (Activation)       (None, 13, 240, 512) 0           batch_normalization_2[0][0]      
+__________________________________________________________________________________________________
+conv2d_5 (Conv2D)               (None, 13, 240, 512) 2359808     activation_4[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_3 (BatchNor (None, 13, 240, 512) 2048        conv2d_5[0][0]                   
+__________________________________________________________________________________________________
+add_1 (Add)                     (None, 13, 240, 512) 0           batch_normalization_3[0][0]      
+                                                                 activation_4[0][0]               
+__________________________________________________________________________________________________
+activation_5 (Activation)       (None, 13, 240, 512) 0           add_1[0][0]                      
+__________________________________________________________________________________________________
+conv2d_6 (Conv2D)               (None, 13, 240, 1024 4719616     activation_5[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_4 (BatchNor (None, 13, 240, 1024 4096        conv2d_6[0][0]                   
+__________________________________________________________________________________________________
+max_pooling2d_2 (MaxPooling2D)  (None, 4, 240, 1024) 0           batch_normalization_4[0][0]      
+__________________________________________________________________________________________________
+activation_6 (Activation)       (None, 4, 240, 1024) 0           max_pooling2d_2[0][0]            
+__________________________________________________________________________________________________
+max_pooling2d_3 (MaxPooling2D)  (None, 1, 240, 1024) 0           activation_6[0][0]               
+__________________________________________________________________________________________________
+lambda (Lambda)                 (None, 240, 1024)    0           max_pooling2d_3[0][0]            
+__________________________________________________________________________________________________
+bidirectional (Bidirectional)   (None, 240, 1024)    6295552     lambda[0][0]                     
+__________________________________________________________________________________________________
+bidirectional_1 (Bidirectional) (None, 240, 1024)    6295552     bidirectional[0][0]              
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 240, 141)     144525      bidirectional_1[0][0]            
+__________________________________________________________________________________________________
+the_labels (InputLayer)         [(None, 240)]        0                                            
+__________________________________________________________________________________________________
+input_length (InputLayer)       [(None, 1)]          0                                            
+__________________________________________________________________________________________________
+label_length (InputLayer)       [(None, 1)]          0                                            
+__________________________________________________________________________________________________
+ctc (Lambda)                    (None, 1)            0           dense[0][0]                      
+                                                                 the_labels[0][0]                 
+                                                                 input_length[0][0]               
+                                                                 label_length[0][0]               
+==================================================================================================
+Total params: 21,965,197
+Trainable params: 21,960,077
+Non-trainable params: 5,120
+__________________________________________________________________________________________________
+</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to                     
+==================================================================================================
+input_1 (InputLayer)            [(None, 118, 2167, 1 0                                            
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 118, 2167, 64 640         input_1[0][0]                    
+__________________________________________________________________________________________________
+max_pooling2d (MaxPooling2D)    (None, 39, 722, 64)  0           conv2d[0][0]                     
+__________________________________________________________________________________________________
+activation (Activation)         (None, 39, 722, 64)  0           max_pooling2d[0][0]              
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 39, 722, 128) 73856       activation[0][0]                 
+__________________________________________________________________________________________________
+max_pooling2d_1 (MaxPooling2D)  (None, 13, 240, 128) 0           conv2d_1[0][0]                   
+__________________________________________________________________________________________________
+activation_1 (Activation)       (None, 13, 240, 128) 0           max_pooling2d_1[0][0]            
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 13, 240, 256) 295168      activation_1[0][0]               
+__________________________________________________________________________________________________
+batch_normalization (BatchNorma (None, 13, 240, 256) 1024        conv2d_2[0][0]                   
+__________________________________________________________________________________________________
+activation_2 (Activation)       (None, 13, 240, 256) 0           batch_normalization[0][0]        
+__________________________________________________________________________________________________
+conv2d_3 (Conv2D)               (None, 13, 240, 256) 590080      activation_2[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_1 (BatchNor (None, 13, 240, 256) 1024        conv2d_3[0][0]                   
+__________________________________________________________________________________________________
+add (Add)                       (None, 13, 240, 256) 0           batch_normalization_1[0][0]      
+                                                                 activation_2[0][0]               
+__________________________________________________________________________________________________
+activation_3 (Activation)       (None, 13, 240, 256) 0           add[0][0]                        
+__________________________________________________________________________________________________
+conv2d_4 (Conv2D)               (None, 13, 240, 512) 1180160     activation_3[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_2 (BatchNor (None, 13, 240, 512) 2048        conv2d_4[0][0]                   
+__________________________________________________________________________________________________
+activation_4 (Activation)       (None, 13, 240, 512) 0           batch_normalization_2[0][0]      
+__________________________________________________________________________________________________
+conv2d_5 (Conv2D)               (None, 13, 240, 512) 2359808     activation_4[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_3 (BatchNor (None, 13, 240, 512) 2048        conv2d_5[0][0]                   
+__________________________________________________________________________________________________
+add_1 (Add)                     (None, 13, 240, 512) 0           batch_normalization_3[0][0]      
+                                                                 activation_4[0][0]               
+__________________________________________________________________________________________________
+activation_5 (Activation)       (None, 13, 240, 512) 0           add_1[0][0]                      
+__________________________________________________________________________________________________
+conv2d_6 (Conv2D)               (None, 13, 240, 1024 4719616     activation_5[0][0]               
+__________________________________________________________________________________________________
+batch_normalization_4 (BatchNor (None, 13, 240, 1024 4096        conv2d_6[0][0]                   
+__________________________________________________________________________________________________
+max_pooling2d_2 (MaxPooling2D)  (None, 4, 240, 1024) 0           batch_normalization_4[0][0]      
+__________________________________________________________________________________________________
+activation_6 (Activation)       (None, 4, 240, 1024) 0           max_pooling2d_2[0][0]            
+__________________________________________________________________________________________________
+max_pooling2d_3 (MaxPooling2D)  (None, 1, 240, 1024) 0           activation_6[0][0]               
+__________________________________________________________________________________________________
+lambda (Lambda)                 (None, 240, 1024)    0           max_pooling2d_3[0][0]            
+__________________________________________________________________________________________________
+bidirectional (Bidirectional)   (None, 240, 1024)    6295552     lambda[0][0]                     
+__________________________________________________________________________________________________
+bidirectional_1 (Bidirectional) (None, 240, 1024)    6295552     bidirectional[0][0]              
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 240, 141)     144525      bidirectional_1[0][0]            
+__________________________________________________________________________________________________
+the_labels (InputLayer)         [(None, 240)]        0                                            
+__________________________________________________________________________________________________
+input_length (InputLayer)       [(None, 1)]          0                                            
+__________________________________________________________________________________________________
+label_length (InputLayer)       [(None, 1)]          0                                            
+__________________________________________________________________________________________________
+ctc (Lambda)                    (None, 1)            0           dense[0][0]                      
+                                                                 the_labels[0][0]                 
+                                                                 input_length[0][0]               
+                                                                 label_length[0][0]               
+==================================================================================================
+Total params: 21,965,197
+Trainable params: 21,960,077
+Non-trainable params: 5,120
+__________________________________________________________________________________________________" tabindex="0" role="button" style="display: inherit;">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon m-2">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none m-2">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+
+More information regarding the implementation can be found in the jupyter notebook in the github.
+
+The number of callbacks I used are very helpful which are ModelCheckpoint, EarlyStopping and ReduceLROnPlateau which allows my model to keep on improving after 2 hours of training.
+
+# Evaluation Metrics:
+# Results
+# References:
+[1] https://github.com/TomHuynhSG/Vietnamese-Handwriting-Recognition-OCR
+
+[2] https://viblo.asia/p/tim-hieu-bai-toan-ocr-voi-crnn-va-ctc-loss-ocr-from-scratch-with-pytorch-p1-OeVKBA905kW
+
+[3] https://viblo.asia/p/nhan-dien-text-trong-hinh-anh-voi-crnnctc-Eb85o9rBZ2G
+
+[4] <a href="https://arxiv.org/pdf/1507.05717.pdf"> An End-to-End Trainable Neural Network for Image-based Sequence Recognition and
+Its Application to Scene Text Recognition</a>
+
+[5] https://distill.pub/2017/ctc/
+
+[6] https://stanford.edu/~shervine/l/vi/teaching/cs-230/cheatsheet-recurrent-neural-networks
