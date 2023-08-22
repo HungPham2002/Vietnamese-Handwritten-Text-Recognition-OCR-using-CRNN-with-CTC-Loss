@@ -85,6 +85,7 @@ Idea: we want to detect text from a text image:
 - Too time comsuming
 - Too expensive
 - Impossible in most cases
+
 This project will use state of the art CRNN model which is a combination of CNN, RNN and CTC loss for image-based sequence recognition tasks, specially OCR (Optical Character Recognition) task which is perfect for handwritten text.
 ![crnn](https://drive.google.com/uc?export=view&id=1gvoDFLSQL9H6tZy_rNxgN27eLdzPnAkL)
 This model is much more superior than traditional way which does not involve any bounding box detection for each character (character segmentation).
