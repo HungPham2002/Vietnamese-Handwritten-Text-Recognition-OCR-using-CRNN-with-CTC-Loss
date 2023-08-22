@@ -144,7 +144,7 @@ CTC is suitable for two tasks:
 - ![Probability](https://drive.google.com/uc?export=view&id=1ZXgFGIBx1NJpnkXdaHkhC3Wdyd3erxoq)
 - ![VisualizeProbability](https://drive.google.com/uc?export=view&id=1z5nhqa8RZ1bC4eJDOpCz-sRwWyDRO_RB)
 
-Once we have the Loss function, we proceed to compute the gradients as usual. Parameters will be adjusted to minimize the negative log likelihood function.
+Once we have the Loss function, we proceed to compute the gradients as usual. Parameters will be adjusted to minimize the negative log likelihood function <code>-log("gtText")</code>.
 
 In the training process. During training, we provide a sample data (an image) and its corresponding Ground Truth text (actual label sequence). The CTC Loss function estimates the loss by computing the probability of the Ground Truth Text based on the output of the BLSTM network. It attempts to find the most probable path corresponding to the Ground Truth Text.
 
