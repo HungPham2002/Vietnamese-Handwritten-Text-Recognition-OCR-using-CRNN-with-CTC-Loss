@@ -141,8 +141,10 @@ CTC is suitable for two tasks:
   + A: A single alignment.
   + A(X,Y): The set of all alignments A for the output sequence Y.
   + at: a single character at each time step of Alignment A.
-- ![Probability](https://drive.google.com/uc?export=view&id=1ZXgFGIBx1NJpnkXdaHkhC3Wdyd3erxoq)
-- ![VisualizeProbability](https://drive.google.com/uc?export=view&id=1z5nhqa8RZ1bC4eJDOpCz-sRwWyDRO_RB)
+
+![Probability](https://drive.google.com/uc?export=view&id=1ZXgFGIBx1NJpnkXdaHkhC3Wdyd3erxoq)
+
+![VisualizeProbability](https://drive.google.com/uc?export=view&id=1z5nhqa8RZ1bC4eJDOpCz-sRwWyDRO_RB)
 
 Once we have the Loss function, we proceed to compute the gradients as usual. Parameters will be adjusted to minimize the negative log likelihood function <code>-log("gtText")</code>.
 
