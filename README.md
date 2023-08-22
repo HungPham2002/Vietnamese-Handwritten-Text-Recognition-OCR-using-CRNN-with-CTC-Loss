@@ -379,3 +379,5 @@ Its Application to Scene Text Recognition</a>
 [5] https://distill.pub/2017/ctc/
 
 [6] https://stanford.edu/~shervine/l/vi/teaching/cs-230/cheatsheet-recurrent-neural-networks
+
+[7] https://github.com/sushant097/Handwritten-Line-Text-Recognition-using-Deep-Learning-with-Tensorflow
