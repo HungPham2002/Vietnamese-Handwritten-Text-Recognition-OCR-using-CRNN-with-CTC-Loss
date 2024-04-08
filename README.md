@@ -65,15 +65,15 @@
 - One advanced technique applied is using the CTC Loss (Connectionist Temporal Classification Loss), which trains the model by matching the predicted output character sequences with target character sequences without requiring exact alignment. This allows the model to recognize long text passages, where determining character boundaries becomes challenging.
 - The research proposes a model for recognizing Vietnamese handwritten addresses using the CRNN method with CTC Loss. The model is trained on a large dataset containing images of Vietnamese handwritten addresses to ensure diversity and high accuracy. The performance of the model is evaluated on a test dataset and compared with previous methods to assess its accuracy and effectiveness.
 # Description Problem:
-![description problem](https://camo.githubusercontent.com/a36e6118ddc69a0b965c506246cf08c1b2db66a64aa8d3c4f6c94377f80df377/68747470733a2f2f692e696d6775722e636f6d2f76776c737835322e706e67)
+![description problem](https://camo.githubusercontent.com/585f7d8543c82f928e77790bcb7c6ecb12597aae1eff2d75a64f8d2c1e11ac48/68747470733a2f2f692e696d6775722e636f6d2f76776c737835322e706e67)
 Given an image of a Vietnamese handwritten line, we need to use an OCR model to transcribe the image into text like above.
 # Dataset:
 The dataset, which have 1838 traning images and 538 testing images. Theirs labels in json file, is provided by Cinnamon AI.
 
 Here are 10 samples of the dataset:
-![sample](https://camo.githubusercontent.com/42caf01b97c950f82d8a2880c192433426e7aecb48ffecaca1b9dbfa7dac04d3/68747470733a2f2f692e696d6775722e636f6d2f66545865746b302e6a7067)
+![sample](https://camo.githubusercontent.com/74745001128e382bbb65eb772bf126ba69153f721a34862a7402c91ef71ae520/68747470733a2f2f692e696d6775722e636f6d2f66545865746b302e6a7067)
 Here is the structure of the json file containing the labels:
-![label](https://camo.githubusercontent.com/66f97a1a493e3c63c5a37158f77e5d35aaa1c3ce435c4ed0bebeda89951a21e0/68747470733a2f2f692e696d6775722e636f6d2f554b7a414e53492e706e67)
+![label](https://camo.githubusercontent.com/e69e289e283a04a71b4d1b496b1080baa9985db8a3490c519468477933b7c4d5/68747470733a2f2f692e696d6775722e636f6d2f554b7a414e53492e706e67)
 Dataset which we merged based on the Cinnamon's dataset: https://drive.google.com/drive/folders/1M4N7bGyAls6X64RTDal6JrO3j136lx-T?usp=drive_link
 
 More detail about dataset, the private test can be downloaded at the google drive link: https://drive.google.com/drive/folders/1Qa2YA6w6V5MaNV-qxqhsHHoYFRK5JB39
